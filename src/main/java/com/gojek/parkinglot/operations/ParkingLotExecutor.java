@@ -3,6 +3,7 @@ package com.gojek.parkinglot.operations;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
+import java.util.stream.Collectors;
 
 import com.gojek.parkinglot.ParkingLot;
 import com.gojek.parkinglot.exceptions.InvalidCommandException;
@@ -63,7 +64,11 @@ public class ParkingLotExecutor {
 			List<String> regNumbers = parkingLot.getRegNumbersForColour(params[1]);
 			System.out.println(String.join(", ", regNumbers));
 			break;
-
+		case "slot_numbers_for_cars_with_colour":
+			List<Integer> slotNumbers = parkingLot.getSlotsForColour(params[1]);
+			System.out.println(
+					String.join(", ", slotNumbers.stream().map(sn -> "" + sn.intValue()).collect(Collectors.toList())));
+			break;
 		default:
 			System.out.println("Invalid command. Please try again.");
 			break;

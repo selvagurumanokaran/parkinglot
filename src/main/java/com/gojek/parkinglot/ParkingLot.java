@@ -10,6 +10,7 @@ import java.util.Queue;
 import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
+import java.util.stream.Stream;
 
 import com.gojek.parkinglot.slots.CarSlot;
 import com.gojek.parkinglot.slots.Slot;
@@ -63,12 +64,17 @@ public class ParkingLot {
 	}
 
 	public List<String> getRegNumbersForColour(String color) {
-		return parkedSlots.values().stream().filter(slot -> slot.getParkedVehicle().getColour().equalsIgnoreCase(color))
-				.map(slot -> slot.getParkedVehicle().getRegNumber()).collect(Collectors.toList());
+		return getSlotStreamForColour(color).map(slot -> slot.getParkedVehicle().getRegNumber())
+				.collect(Collectors.toList());
 	}
 
-	public int[] getSlotsForColour(String color) {
-		return null;
+	private Stream<Slot> getSlotStreamForColour(String color) {
+		return parkedSlots.values().stream()
+				.filter(slot -> slot.getParkedVehicle().getColour().equalsIgnoreCase(color));
+	}
+
+	public List<Integer> getSlotsForColour(String color) {
+		return getSlotStreamForColour(color).map(slot -> (Integer) slot.getLotNumber()).collect(Collectors.toList());
 	}
 
 	public int getSlotForRegNum(String regNum) {

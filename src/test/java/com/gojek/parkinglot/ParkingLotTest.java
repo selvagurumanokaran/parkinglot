@@ -98,4 +98,26 @@ public class ParkingLotTest {
 		regNumbers = parkingLot.getRegNumbersForColour("Blue");
 		Assert.assertTrue(regNumbers.size() == 0);
 	}
+
+	@Test
+	public void testGetSlotOfColour() {
+		ParkingLot parkingLot = new ParkingLot(5);
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-1234", "White");
+		int slotNumber = parkingLot.park(VehicleType.CAR, "KA-01-HH-9999", "White");
+		parkingLot.park(VehicleType.CAR, "KA-01-BB-0001", "Black");
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-2701", "White");
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-7777", "Red");
+		List<Integer> slots = parkingLot.getSlotsForColour("White");
+		Assert.assertTrue(slots.size() == 3);
+		Assert.assertTrue(slots.get(0) == 1);
+		Assert.assertTrue(slots.get(1) == 2);
+		Assert.assertTrue(slots.get(2) == 4);
+		parkingLot.unpark(slotNumber);
+		slots = parkingLot.getSlotsForColour("White");
+		Assert.assertTrue(slots.size() == 2);
+		Assert.assertTrue(slots.get(0) == 1);
+		Assert.assertTrue(slots.get(1) == 4);
+		slots = parkingLot.getSlotsForColour("Blue");
+		Assert.assertTrue(slots.size() == 0);
+	}
 }
