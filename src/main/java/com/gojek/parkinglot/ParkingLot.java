@@ -78,7 +78,12 @@ public class ParkingLot {
 	}
 
 	public int getSlotForRegNum(String regNum) {
-		return 0;
+		Optional<Slot> optional = parkedSlots.values().stream()
+				.filter(slot -> slot.getParkedVehicle().getRegNumber().equalsIgnoreCase(regNum)).findFirst();
+		if (optional.isPresent()) {
+			return optional.get().getLotNumber();
+		}
+		return -1;
 	}
 
 	public static Vehicle createVehicle(VehicleType type, String regNumber, String Colour) {

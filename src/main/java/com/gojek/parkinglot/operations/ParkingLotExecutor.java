@@ -69,6 +69,14 @@ public class ParkingLotExecutor {
 			System.out.println(
 					String.join(", ", slotNumbers.stream().map(sn -> "" + sn.intValue()).collect(Collectors.toList())));
 			break;
+		case "slot_number_for_registration_number":
+			int slNum = parkingLot.getSlotForRegNum(params[1]);
+			if (slNum > 0) {
+				System.out.println(slNum);
+			} else {
+				System.out.println("Not found");
+			}
+			break;
 		default:
 			System.out.println("Invalid command. Please try again.");
 			break;
