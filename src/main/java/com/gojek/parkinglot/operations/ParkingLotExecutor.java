@@ -1,5 +1,8 @@
 package com.gojek.parkinglot.operations;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Collection;
 import java.util.List;
 import java.util.Scanner;
@@ -13,27 +16,31 @@ import com.gojek.parkinglot.vehicles.VehicleType;
 
 public class ParkingLotExecutor {
 
-	public static void main(String[] args) throws InvalidCommandException {
+	public static void main(String[] args) throws InvalidCommandException, FileNotFoundException {
 		if (args.length > 0) {
-			System.out.println("Proccessing file ....");
+			process(new FileInputStream(args[0]));
 		} else {
-			Scanner scanner = new Scanner(System.in);
-			String currentLine = scanner.nextLine();
-			String params[] = currentLine.split(" ");
-			if (params[0].equals("create_parking_lot")) {
-				int noOfSlots = Integer.parseInt(params[1]);
-				ParkingLot parkingLot = new ParkingLot(noOfSlots);
-				System.out.println("Created a parking lot with " + noOfSlots + " slots");
-				while (!(currentLine = scanner.nextLine()).trim().equalsIgnoreCase("exit")) {
-					params = currentLine.trim().split(" ");
-					processCommand(parkingLot, params);
-				}
-				scanner.close();
-			} else {
-				scanner.close();
-				throw new InvalidCommandException("First command should be 'create_parking_lot'");
-			}
+			process(System.in);
 		}
+
+	}
+
+	private static void process(InputStream inputStream) throws InvalidCommandException {
+		Scanner scanner = new Scanner(inputStream);
+		String currentLine = scanner.nextLine();
+		String params[] = currentLine.split(" ");
+		if (!params[0].equals("create_parking_lot")) {
+			scanner.close();
+			throw new InvalidCommandException("First command should be 'create_parking_lot'");
+		}
+		int noOfSlots = Integer.parseInt(params[1]);
+		ParkingLot parkingLot = new ParkingLot(noOfSlots);
+		System.out.println("Created a parking lot with " + noOfSlots + " slots");
+		while (scanner.hasNextLine() && !(currentLine = scanner.nextLine().trim()).equalsIgnoreCase("exit")) {
+			params = currentLine.trim().split(" ");
+			processCommand(parkingLot, params);
+		}
+		scanner.close();
 	}
 
 	private static void processCommand(ParkingLot parkingLot, String[] params) {
@@ -48,12 +55,12 @@ public class ParkingLotExecutor {
 			break;
 		case "status":
 			Collection<Slot> slots = parkingLot.getAllParkedSlots();
-			System.out.println("Slot No. Registration No Colour");
+			System.out.format("%-12s%-19s%-6s","Slot No.", "Registration No","Colour");
 			slots.forEach((s) -> {
 				Vehicle vehicle = s.getParkedVehicle();
-				System.out.println(
-						vehicle.getSlot().getLotNumber() + " " + vehicle.getRegNumber() + " " + vehicle.getColour());
+				System.out.format("\n%-12s%-19s%s", vehicle.getSlot().getLotNumber(), vehicle.getRegNumber(), vehicle.getColour());
 			});
+			System.out.println();
 			break;
 		case "leave":
 			int slotNumber = Integer.parseInt(params[1]);

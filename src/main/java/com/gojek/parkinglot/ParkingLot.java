@@ -19,8 +19,8 @@ import com.gojek.parkinglot.vehicles.Vehicle;
 import com.gojek.parkinglot.vehicles.VehicleType;
 
 public class ParkingLot {
-	Queue<Slot> availableSlots;
-	Map<Integer, Slot> parkedSlots;
+	private Queue<Slot> availableSlots;
+	private Map<Integer, Slot> parkedSlots;
 
 	public ParkingLot(int noOfSlots) {
 		availableSlots = new PriorityQueue<>(noOfSlots, Comparator.comparing(Slot::getLotNumber));
