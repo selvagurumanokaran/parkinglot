@@ -2,12 +2,12 @@ package com.gojek.parkinglot;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
+import java.util.TreeMap;
 import java.util.stream.IntStream;
 
 import com.gojek.parkinglot.slots.CarSlot;
@@ -25,7 +25,7 @@ public class ParkingLot {
 		IntStream.range(0, noOfSlots).forEach((cnt) -> {
 			availableSlots.add(new CarSlot(cnt + 1));
 		});
-		parkedSlots = new HashMap<>(noOfSlots);
+		parkedSlots = new TreeMap<>();
 	}
 
 	public int park(VehicleType type, String regNumber, String colour) {
@@ -46,6 +46,16 @@ public class ParkingLot {
 			return slot.getLotNumber();
 		}
 		return -1;
+	}
+
+	public boolean unpark(int slotNumber) {
+		Optional<Slot> slotOptional = Optional.ofNullable(parkedSlots.remove(slotNumber));
+		if (slotOptional.isPresent()) {
+			Slot slot = slotOptional.get();
+			slot.setVehicle(null);
+			return availableSlots.offer(slot);
+		}
+		return false;
 	}
 
 	public Collection<Slot> getAllParkedSlots() {
