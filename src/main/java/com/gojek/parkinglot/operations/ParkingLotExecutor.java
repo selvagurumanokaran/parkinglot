@@ -1,9 +1,12 @@
 package com.gojek.parkinglot.operations;
 
+import java.util.Collection;
 import java.util.Scanner;
 
 import com.gojek.parkinglot.ParkingLot;
 import com.gojek.parkinglot.exceptions.InvalidCommandException;
+import com.gojek.parkinglot.slots.Slot;
+import com.gojek.parkinglot.vehicles.Vehicle;
 import com.gojek.parkinglot.vehicles.VehicleType;
 
 public class ParkingLotExecutor {
@@ -20,27 +23,39 @@ public class ParkingLotExecutor {
 				ParkingLot parkingLot = new ParkingLot(noOfSlots);
 				System.out.println("Created a parking lot with " + noOfSlots + " slots");
 				while (!(currentLine = scanner.nextLine()).trim().equalsIgnoreCase("exit")) {
-					params = currentLine.split(" ");
-					switch (params[0]) {
-					case "park":
-						int slot = parkingLot.park(VehicleType.CAR, params[1], params[2]);
-						if (slot > -1) {
-							System.out.println("Allocated slot number: " + (slot + 1));
-						} else {
-							System.out.println("Sorry, parking lot is full");
-						}
-						break;
-
-					default:
-						System.out.println("Invalid command. Please try again.");
-						break;
-					}
+					params = currentLine.trim().split(" ");
+					processCommand(parkingLot, params);
 				}
 				scanner.close();
 			} else {
 				scanner.close();
 				throw new InvalidCommandException("First command should be 'create_parking_lot'");
 			}
+		}
+	}
+
+	private static void processCommand(ParkingLot parkingLot, String[] params) {
+		switch (params[0]) {
+		case "park":
+			int slot = parkingLot.park(VehicleType.CAR, params[1], params[2]);
+			if (slot > -1) {
+				System.out.println("Allocated slot number: " + slot);
+			} else {
+				System.out.println("Sorry, parking lot is full");
+			}
+			break;
+		case "status":
+			Collection<Slot> slots = parkingLot.getAllParkedSlots();
+			System.out.println("Slot No. Registration No Colour");
+			slots.forEach((s) -> {
+				Vehicle vehicle = s.getParkedVehicle();
+				System.out.println(
+						vehicle.getSlot().getLotNumber() + " " + vehicle.getRegNumber() + " " + vehicle.getColour());
+			});
+			break;
+		default:
+			System.out.println("Invalid command. Please try again.");
+			break;
 		}
 	}
 }

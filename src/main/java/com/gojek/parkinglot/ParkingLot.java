@@ -1,8 +1,10 @@
 package com.gojek.parkinglot;
 
-import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
@@ -16,34 +18,38 @@ import com.gojek.parkinglot.vehicles.VehicleType;
 
 public class ParkingLot {
 	Queue<Slot> availableSlots;
-	List<Slot> parkedSlots;
+	Map<Integer, Slot> parkedSlots;
 
 	public ParkingLot(int noOfSlots) {
 		availableSlots = new PriorityQueue<>(noOfSlots, Comparator.comparing(Slot::getLotNumber));
 		IntStream.range(0, noOfSlots).forEach((cnt) -> {
 			availableSlots.add(new CarSlot(cnt + 1));
 		});
-		parkedSlots = new ArrayList<>(noOfSlots);
+		parkedSlots = new HashMap<>(noOfSlots);
 	}
 
 	public int park(VehicleType type, String regNumber, String colour) {
-		Vehicle vehicle = ParkingLot.createVehicle(type, regNumber, colour);
+
+		Optional<Slot> slotOptional = parkedSlots.values().stream().filter((s) -> {
+			return s.getParkedVehicle().getRegNumber() == regNumber;
+		}).findFirst();
+		if (slotOptional.isPresent()) {
+			return slotOptional.get().getLotNumber();
+		}
 		Optional<Slot> optional = Optional.ofNullable(availableSlots.poll());
 		if (optional.isPresent()) {
+			Vehicle vehicle = ParkingLot.createVehicle(type, regNumber, colour);
 			Slot slot = optional.get();
 			slot.setVehicle(vehicle);
-			parkedSlots.add(slot);
+			vehicle.setSlot(slot);
+			parkedSlots.put(slot.getLotNumber(), slot);
 			return slot.getLotNumber();
 		}
 		return -1;
 	}
 
-	public boolean unpark() {
-		return false;
-	}
-
-	public List<Slot> getAllParkedSlots() {
-		return parkedSlots;
+	public Collection<Slot> getAllParkedSlots() {
+		return parkedSlots.values();
 	}
 
 	public List<String> getRegNumbersForColour(String color) {

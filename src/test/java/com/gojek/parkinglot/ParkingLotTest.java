@@ -27,4 +27,13 @@ public class ParkingLotTest {
 		Assert.assertTrue(slot == -1);
 	}
 
+	@Test
+	public void testParkingDuplicateCar() {
+		ParkingLot parkingLot = new ParkingLot(2);
+		int slot = parkingLot.park(VehicleType.CAR, "KA-01-HH-1234", "White");
+		Assert.assertTrue(slot == 1);
+		slot = parkingLot.park(VehicleType.CAR, "KA-01-HH-1234", "White");
+		Assert.assertTrue(slot == 1);
+	}
+
 }
