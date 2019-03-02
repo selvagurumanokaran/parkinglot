@@ -1,5 +1,6 @@
 package com.gojek.parkinglot;
 
+import java.util.List;
 import java.util.Optional;
 
 import org.junit.Assert;
@@ -82,5 +83,19 @@ public class ParkingLotTest {
 			return s.getParkedVehicle().getRegNumber() == "KA-01-HH-9999";
 		}).findAny();
 		Assert.assertFalse(optional.isPresent());
+	}
+
+	@Test
+	public void testGetRegNumbersOfColour() {
+		ParkingLot parkingLot = new ParkingLot(5);
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-1234", "White");
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-9999", "White");
+		parkingLot.park(VehicleType.CAR, "KA-01-BB-0001", "Black");
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-2701", "White");
+		parkingLot.park(VehicleType.CAR, "KA-01-HH-7777", "Red");
+		List<String> regNumbers = parkingLot.getRegNumbersForColour("White");
+		Assert.assertTrue(regNumbers.size() == 3);
+		regNumbers = parkingLot.getRegNumbersForColour("Blue");
+		Assert.assertTrue(regNumbers.size() == 0);
 	}
 }

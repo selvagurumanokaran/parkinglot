@@ -1,6 +1,7 @@
 package com.gojek.parkinglot.operations;
 
 import java.util.Collection;
+import java.util.List;
 import java.util.Scanner;
 
 import com.gojek.parkinglot.ParkingLot;
@@ -53,6 +54,16 @@ public class ParkingLotExecutor {
 						vehicle.getSlot().getLotNumber() + " " + vehicle.getRegNumber() + " " + vehicle.getColour());
 			});
 			break;
+		case "leave":
+			int slotNumber = Integer.parseInt(params[1]);
+			parkingLot.unpark(slotNumber);
+			System.out.println("Slot number " + slotNumber + " is free");
+			break;
+		case "registration_numbers_for_cars_with_colour":
+			List<String> regNumbers = parkingLot.getRegNumbersForColour(params[1]);
+			System.out.println(String.join(", ", regNumbers));
+			break;
+
 		default:
 			System.out.println("Invalid command. Please try again.");
 			break;

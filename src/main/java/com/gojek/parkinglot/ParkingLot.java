@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.PriorityQueue;
 import java.util.Queue;
 import java.util.TreeMap;
+import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 
 import com.gojek.parkinglot.slots.CarSlot;
@@ -30,9 +31,8 @@ public class ParkingLot {
 
 	public int park(VehicleType type, String regNumber, String colour) {
 
-		Optional<Slot> slotOptional = parkedSlots.values().stream().filter((s) -> {
-			return s.getParkedVehicle().getRegNumber() == regNumber;
-		}).findFirst();
+		Optional<Slot> slotOptional = parkedSlots.values().stream()
+				.filter(s -> s.getParkedVehicle().getRegNumber() == regNumber).findFirst();
 		if (slotOptional.isPresent()) {
 			return slotOptional.get().getLotNumber();
 		}
@@ -63,7 +63,8 @@ public class ParkingLot {
 	}
 
 	public List<String> getRegNumbersForColour(String color) {
-		return null;
+		return parkedSlots.values().stream().filter(slot -> slot.getParkedVehicle().getColour().equalsIgnoreCase(color))
+				.map(slot -> slot.getParkedVehicle().getRegNumber()).collect(Collectors.toList());
 	}
 
 	public int[] getSlotsForColour(String color) {
