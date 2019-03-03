@@ -21,19 +21,23 @@ import com.gojek.parkinglot.vehicles.VehicleType;
 public class ParkingLot {
 	private Queue<Slot> availableSlots;
 	private Map<Integer, Slot> parkedSlots;
+	private int level;
 
 	public ParkingLot(int noOfSlots) {
 		availableSlots = new PriorityQueue<>(noOfSlots, Comparator.comparing(Slot::getLotNumber));
-		IntStream.range(0, noOfSlots).forEach((cnt) -> {
-			availableSlots.add(new CarSlot(cnt + 1));
-		});
+		IntStream.range(0, noOfSlots).forEach(cnt -> availableSlots.add(new CarSlot(cnt + 1)));
 		parkedSlots = new TreeMap<>();
+	}
+
+	public ParkingLot(int level, int noOfSlots) {
+		this(noOfSlots);
+		this.level = level;
 	}
 
 	public int park(VehicleType type, String regNumber, String colour) {
 
 		Optional<Slot> slotOptional = parkedSlots.values().stream()
-				.filter(s -> s.getParkedVehicle().getRegNumber() == regNumber).findFirst();
+				.filter(s -> s.getParkedVehicle().getRegNumber().equalsIgnoreCase(regNumber)).findFirst();
 		if (slotOptional.isPresent()) {
 			return slotOptional.get().getLotNumber();
 		}
@@ -94,5 +98,13 @@ public class ParkingLot {
 			break;
 		}
 		return vehicle;
+	}
+
+	public int getLevel() {
+		return level;
+	}
+
+	public boolean isSlotAvailble() {
+		return availableSlots.size() > 0;
 	}
 }
