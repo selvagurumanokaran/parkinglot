@@ -10,16 +10,22 @@ import com.gojek.parkinglot.vehicles.VehicleType;
 
 public class ParkingLotExecutor {
 
+	ParkingLotService parkingLotService;
+
 	public static void main(String[] args) throws InvalidCommandException, FileNotFoundException {
+		ParkingLotExecutor executor = new ParkingLotExecutor();
+		executor.execute(args);
+	}
+
+	private void execute(String[] args) throws FileNotFoundException, InvalidCommandException {
 		if (args.length > 0) {
 			process(new FileInputStream(args[0]));
 		} else {
 			process(System.in);
 		}
-
 	}
 
-	private static void process(InputStream inputStream) throws InvalidCommandException {
+	private void process(InputStream inputStream) throws InvalidCommandException {
 		Scanner scanner = new Scanner(inputStream);
 		String currentLine = scanner.nextLine();
 		String params[] = currentLine.split(" ");
@@ -28,16 +34,16 @@ public class ParkingLotExecutor {
 			throw new InvalidCommandException("First command should be 'create_parking_lot'");
 		}
 		int noOfSlots = Integer.parseInt(params[1]);
-		ParkingLotService parkingLotService = new ParkingLotService(1, noOfSlots);
+		 parkingLotService = new ParkingLotService(1, noOfSlots);
 		System.out.println("Created a parking lot with " + noOfSlots + " slots");
 		while (scanner.hasNextLine() && !(currentLine = scanner.nextLine().trim()).equalsIgnoreCase("exit")) {
 			params = currentLine.trim().split(" ");
-			processCommand(parkingLotService, params);
+			processCommand(params);
 		}
 		scanner.close();
 	}
 
-	private static void processCommand(ParkingLotService parkingLotService, String[] params) {
+	private void processCommand(String[] params) {
 		switch (params[0]) {
 		case "park":
 			parkingLotService.park(VehicleType.CAR, params[1], params[2]);
