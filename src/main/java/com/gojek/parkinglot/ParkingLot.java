@@ -2,7 +2,6 @@ package com.gojek.parkinglot;
 
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.PriorityQueue;
@@ -67,7 +66,7 @@ public class ParkingLot {
 		return parkedSlots.values();
 	}
 
-	public List<String> getRegNumbersForColour(String color) {
+	public Collection<String> getRegNumbersForColour(String color) {
 		return getSlotStreamForColour(color).map(slot -> slot.getParkedVehicle().getRegNumber())
 				.collect(Collectors.toList());
 	}
@@ -77,7 +76,7 @@ public class ParkingLot {
 				.filter(slot -> slot.getParkedVehicle().getColour().equalsIgnoreCase(color));
 	}
 
-	public List<Integer> getSlotsForColour(String color) {
+	public Collection<Integer> getSlotsForColour(String color) {
 		return getSlotStreamForColour(color).map(slot -> (Integer) slot.getLotNumber()).collect(Collectors.toList());
 	}
 

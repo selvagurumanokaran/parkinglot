@@ -1,5 +1,6 @@
 package com.gojek.parkinglot;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,7 +94,7 @@ public class ParkingLotTest {
 		parkingLot.park(VehicleType.CAR, "KA-01-BB-0001", "Black");
 		parkingLot.park(VehicleType.CAR, "KA-01-HH-2701", "White");
 		parkingLot.park(VehicleType.CAR, "KA-01-HH-7777", "Red");
-		List<String> regNumbers = parkingLot.getRegNumbersForColour("White");
+		Collection<String> regNumbers = parkingLot.getRegNumbersForColour("White");
 		Assert.assertTrue(regNumbers.size() == 3);
 		regNumbers = parkingLot.getRegNumbersForColour("Blue");
 		Assert.assertTrue(regNumbers.size() == 0);
@@ -107,17 +108,17 @@ public class ParkingLotTest {
 		parkingLot.park(VehicleType.CAR, "KA-01-BB-0001", "Black");
 		parkingLot.park(VehicleType.CAR, "KA-01-HH-2701", "White");
 		parkingLot.park(VehicleType.CAR, "KA-01-HH-7777", "Red");
-		List<Integer> slots = parkingLot.getSlotsForColour("White");
+		List<Integer> slots = (List<Integer>) parkingLot.getSlotsForColour("White");
 		Assert.assertTrue(slots.size() == 3);
 		Assert.assertTrue(slots.get(0) == 1);
 		Assert.assertTrue(slots.get(1) == 2);
 		Assert.assertTrue(slots.get(2) == 4);
 		parkingLot.unpark(slotNumber);
-		slots = parkingLot.getSlotsForColour("White");
+		slots = (List<Integer>) parkingLot.getSlotsForColour("White");
 		Assert.assertTrue(slots.size() == 2);
 		Assert.assertTrue(slots.get(0) == 1);
 		Assert.assertTrue(slots.get(1) == 4);
-		slots = parkingLot.getSlotsForColour("Blue");
+		slots = (List<Integer>) parkingLot.getSlotsForColour("Blue");
 		Assert.assertTrue(slots.size() == 0);
 	}
 

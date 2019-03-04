@@ -1,115 +1,99 @@
 package com.gojek.parkinglot.services;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.PriorityQueue;
-import java.util.Queue;
+import java.util.Scanner;
 import java.util.stream.Collectors;
-import java.util.stream.IntStream;
 
-import com.gojek.parkinglot.ParkingLot;
+import com.gojek.parkinglot.MultiLevelParkingLot;
+import com.gojek.parkinglot.exceptions.InvalidCommandException;
 import com.gojek.parkinglot.slots.Slot;
 import com.gojek.parkinglot.vehicles.Vehicle;
 import com.gojek.parkinglot.vehicles.VehicleType;
 
 public class ParkingLotService {
-	private Queue<ParkingLot> parkingLots;
 
-	public ParkingLotService(int noOfLevels, int noOfSlots) {
-		parkingLots = new PriorityQueue<>(noOfLevels, new Comparator<ParkingLot>() {
-			@Override
-			public int compare(ParkingLot o1, ParkingLot o2) {
-				if (o1.getLevel() < o2.getLevel() && o1.isSlotAvailble()) {
-					return -1;
-				}
-				return 1;
-			}
-		});
-		IntStream.range(0, noOfLevels).forEach(cnt -> parkingLots.add(new ParkingLot(noOfSlots)));
+	private MultiLevelParkingLot multiLevelparkingLot;
+
+	public static void main(String[] args) throws InvalidCommandException, FileNotFoundException {
+		ParkingLotService executor = new ParkingLotService();
+		executor.execute(args);
 	}
 
-	private Optional<ParkingLot> getParkingLot() {
-		ParkingLot parkingLot = parkingLots.peek();
-		ParkingLot result = null;
-		if (parkingLot.isSlotAvailble()) {
-			result = parkingLot;
-		}
-		return Optional.ofNullable(result);
-	}
-
-	private Optional<ParkingLot> getParkingLot(int level) {
-		return parkingLots.stream().filter(pl -> pl.getLevel() == level).findFirst();
-	}
-
-	public void park(VehicleType type, String regNumber, String colour) {
-		Optional<ParkingLot> parkingLotOptional = this.getParkingLot();
-		if (parkingLotOptional.isPresent()) {
-			ParkingLot parkingLot = parkingLotOptional.get();
-			int slot = parkingLot.park(type, regNumber, colour);
-			System.out.println("Allocated slot number: " + slot);
+	private void execute(String[] args) throws FileNotFoundException, InvalidCommandException {
+		if (args.length > 0) {
+			process(new FileInputStream(args[0]));
 		} else {
-			System.out.println("Sorry, parking lot is full");
+			process(System.in);
 		}
 	}
 
-	public void printStatus(int level) {
-		Optional<ParkingLot> parkingLotOptional = this.getParkingLot(level);
-		System.out.format("%-12s%-19s%-6s", "Slot No.", "Registration No", "Colour");
-		if (parkingLotOptional.isPresent()) {
-			ParkingLot parkingLot = parkingLotOptional.get();
-			Collection<Slot> slots = parkingLot.getAllParkedSlots();
+	private void process(InputStream inputStream) throws InvalidCommandException {
+		Scanner scanner = new Scanner(inputStream);
+		String currentLine = scanner.nextLine();
+		String params[] = currentLine.split(" ");
+		if (!params[0].equals("create_parking_lot")) {
+			scanner.close();
+			throw new InvalidCommandException("First command should be 'create_parking_lot'");
+		}
+		int noOfSlots = Integer.parseInt(params[1]);
+		multiLevelparkingLot = new MultiLevelParkingLot(1, noOfSlots);
+		System.out.println("Created a parking lot with " + noOfSlots + " slots");
+		while (scanner.hasNextLine() && !(currentLine = scanner.nextLine().trim()).equalsIgnoreCase("exit")) {
+			params = currentLine.trim().split(" ");
+			processCommand(params);
+		}
+		scanner.close();
+	}
+
+	private void processCommand(String[] params) {
+		switch (params[0]) {
+		case "park":
+			int slot = multiLevelparkingLot.park(VehicleType.CAR, params[1], params[2]);
+			if (slot > 0) {
+				System.out.println("Allocated slot number: " + slot);
+			} else {
+				System.out.println("Sorry, parking lot is full");
+			}
+			break;
+		case "status":
+			System.out.format("%-12s%-19s%-6s", "Slot No.", "Registration No", "Colour");
+			Collection<Slot> slots = multiLevelparkingLot.getStatusForLevel(0);
 			slots.forEach((s) -> {
 				Vehicle vehicle = s.getParkedVehicle();
 				System.out.format("\n%-12s%-19s%s", vehicle.getSlot().getLotNumber(), vehicle.getRegNumber(),
 						vehicle.getColour());
 			});
 			System.out.println();
-		}
-	}
-
-	public void unpark(int level, int slotNumber) {
-		Optional<ParkingLot> parkingLotOptional = this.getParkingLot(level);
-		if (parkingLotOptional.isPresent()) {
-			ParkingLot parkingLot = parkingLotOptional.get();
-			if (parkingLot.unpark(slotNumber))
+			break;
+		case "leave":
+			int slotNumber = Integer.parseInt(params[1]);
+			boolean success = multiLevelparkingLot.unparkAtLevel(0, slotNumber);
+			if (success)
 				System.out.println("Slot number " + slotNumber + " is free");
-		}
-	}
-
-	public void printRegNumbersForColour(int level, String colour) {
-		Optional<ParkingLot> parkingLotOptional = this.getParkingLot(level);
-		List<String> regNumbers = Collections.emptyList();
-		if (parkingLotOptional.isPresent()) {
-			ParkingLot parkingLot = parkingLotOptional.get();
-			regNumbers = parkingLot.getRegNumbersForColour(colour);
-		}
-		System.out.println(String.join(", ", regNumbers));
-	}
-
-	public void printSlotNumbersForColour(int level, String colour) {
-		Optional<ParkingLot> parkingLotOptional = this.getParkingLot(level);
-		if (parkingLotOptional.isPresent()) {
-			ParkingLot parkingLot = parkingLotOptional.get();
-			List<Integer> slotNumbers = parkingLot.getSlotsForColour(colour);
+			break;
+		case "registration_numbers_for_cars_with_colour":
+			Collection<String>  regNumbers = multiLevelparkingLot.getRegNumbersForColour(0, params[1]);
+			System.out.println(String.join(", ", regNumbers));
+			break;
+		case "slot_numbers_for_cars_with_colour":
+			Collection<Integer> slotNumbers = multiLevelparkingLot.getSlotNumbersForColour(0, params[1]);
 			System.out.println(
 					String.join(", ", slotNumbers.stream().map(sn -> "" + sn.intValue()).collect(Collectors.toList())));
-		}
-	}
-
-	public void printSlotForRegNum(int level, String regNumber) {
-		Optional<ParkingLot> parkingLotOptional = this.getParkingLot(level);
-		if (parkingLotOptional.isPresent()) {
-			ParkingLot parkingLot = parkingLotOptional.get();
-			int slNum = parkingLot.getSlotForRegNum(regNumber);
+			break;
+		case "slot_number_for_registration_number":
+			int slNum =multiLevelparkingLot.getSlotForRegNum(0, params[1]);
 			if (slNum > 0) {
 				System.out.println(slNum);
 			} else {
 				System.out.println("Not found");
 			}
+			break;
+		default:
+			System.out.println("Invalid command. Please try again.");
+			break;
 		}
-
 	}
 }
