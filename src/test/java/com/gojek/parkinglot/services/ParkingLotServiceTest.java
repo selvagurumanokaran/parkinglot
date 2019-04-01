@@ -33,4 +33,10 @@ public class ParkingLotServiceTest {
 				"KA-01-HH-1234, KA-01-HH-9999, KA-01-P-333\n", "1, 2, 4\n", "6\n", "Not found\n");
 		Assert.assertEquals(expected, output.toString());
 	}
+	
+	@Test
+	public void testCreateParkingLot() {
+		ClassLoader classLoader = getClass().getClassLoader();
+		File file = new File(classLoader.getResource("file_create.txt").getFile());
+	}
 }
